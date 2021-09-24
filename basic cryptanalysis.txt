@@ -1,0 +1,57 @@
+def sequencer(s):
+    p=""
+    r=""
+    c=0
+    for i in s:
+        if i in p:
+            r+=r[p.index(i)]
+        else:
+            r+=str(c)
+            c+=1
+            p+=i
+    return r
+
+a=open("dictionary.lst")
+a=[i.lower() for i in a.read().split("\n")]
+#b="lhpohes gvjhe ztytwojmmtel lgsfcgver segpsltjyl vftstelc djfl rml catrroel jscvjqjyfo mjlesl lcjmmfqe egvj gsfyhtyq sjfgver csfaotyq lfxtyq gjywplesl lxljm dxcel mpyctyq ztytwojmmtelel mfcgv spres mjm psgvty bfml ofle mjlc dtc tygfycfctjy dfsyl zpygvel csfao yealqsjpml atyl lgsjql qyfsotelc fseyf ojllel gjzmselltyq wpyhtelc zpltgl weygel afyher rstnesl aefleo rtyhes mvflel yphe rstnes qojder dtwwer lojml mfcgvel reocfl djzder djpygtyq gstmmoeafsel reg cpdel qspyqe mflctel csflvtyq vfcl avfghtyq vftsdfool mzer sfmtyq rsjye wjjol psol mplvtyq catrroe mvfqe lgseey leqzeycer wjseqsjpyrer lmjtoes msjwtoel docl djpyger cjpstlcl goefy gojddesl mjrl qjddoe gjy gpdtyql lyftotyq rjayojfr swgl vjle atrqec gjzmfgces frfl qotcgver gspzd zftodjzdl lyfsh"
+b=input()
+v=b
+original=""
+for i in b:
+    if not i==" " and i not in original:
+        original+=i
+substitution=""
+for i in range(len(original)):
+    substitution+=" "
+b=[(len(i),i) for i in b.split(" ")]
+while " " in substitution:
+    m=max(b)
+    c=[i for i in a if len(i)==m[0]]
+    q=sequencer(m[1])
+    h=[i for i in c if sequencer(i)==q]
+    qw=[]
+    for i in h:
+        g=1
+        cou=0
+        for j in range(len(i)):
+            if i[j] in substitution:
+                if not original[substitution.index(i[j])]==m[1][j]:
+                    g=2
+                    break
+            else:
+                cou+=1
+        if g==1:
+            qw.append((i,cou))
+    if len(qw)==1 and qw[0][1]>0:
+        for i in range(len(qw[0][0])):
+            k=original.index(m[1][i])
+            if substitution[k]==" ":
+                substitution=substitution[:k]+qw[0][0][i]+substitution[k+1:]
+    del(b[b.index(m)])
+
+dic={}
+[dic.update({original[i]:substitution[i]}) for i in range(len(original))]
+dic.update({" ":" "})
+for i in v:
+    print(dic[i],end="")
+##    input()

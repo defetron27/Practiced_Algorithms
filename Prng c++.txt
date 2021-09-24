@@ -1,0 +1,120 @@
+#include <cmath>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+class Random {
+public:
+  Random(int64_t);
+  int nextInt(int);
+private:
+  int64_t seed;
+};
+
+Random::Random(int64_t seed) {
+  this->seed = seed;
+}
+
+int Random::nextInt(int n) {
+  this->seed = (this->seed * 0x5DEECE66Dll + 0xBll) & ((1ll << 48) - 1);
+
+  return (int)(this->seed >> 17) % n;
+}
+
+Random bruteGenerator();
+
+const int TEST_CASE_NUMBERS_COUNT = 10;
+const int N = 1000;
+const int P_2_17 = (int)std::pow(2, 17);
+const int P_2_28 = (int)std::pow(2, 28);
+
+int main() {
+  int n;
+  std::cin >> n;
+
+  for (int caseIdx = 0; caseIdx < n; caseIdx++) {
+    Random randGenerator = bruteGenerator();
+
+    if (caseIdx != 0) {
+      std::cout << std::endl;
+    }
+
+    for (int i = 0; i < 10; ++i) {
+      if (i > 0) {
+        std::cout << ' ';
+      }
+
+      std::cout << randGenerator.nextInt(N);
+    }
+  }
+
+  return 0;
+}
+
+Random bruteGenerator() {
+  const int TEST_NUMBERS_COUNT = TEST_CASE_NUMBERS_COUNT - 1;
+
+  int testNum1;
+  int testNum1Mod8;
+  int testNumbers[TEST_NUMBERS_COUNT];
+  int testNumbersMod8[TEST_NUMBERS_COUNT];
+  std::vector<int> correctLower17BitsSeeds;
+  int thousandsTryCount;
+
+  std::cin >> testNum1;
+  for (int i = 0; i < TEST_NUMBERS_COUNT; ++i) {
+    std::cin >> testNumbers[i];
+  }
+
+  testNum1Mod8 = testNum1 % 8;
+  for (int i = 0; i < TEST_NUMBERS_COUNT; ++i) {
+    testNumbersMod8[i] = testNumbers[i] % 8;
+  }
+
+  correctLower17BitsSeeds = std::vector<int>();
+
+  for (int i = 0; i < P_2_17; ++i) {
+    int seedLower20Bits = (testNum1Mod8 << 17) + i;
+    Random generator = Random(seedLower20Bits);
+    bool isGeneratorWrong = false;
+    for (int const& testNumberMod8: testNumbersMod8) {
+      int rand = generator.nextInt(8);
+      if (rand != testNumberMod8) {
+        isGeneratorWrong = true;
+        break;
+      }
+    }
+
+    if (!isGeneratorWrong) {
+      correctLower17BitsSeeds.push_back(seedLower20Bits & (P_2_17 - 1));
+    }
+  }
+
+  thousandsTryCount = 0;
+  while (true) {
+    for (int const& lower17BitsSeed: correctLower17BitsSeeds) {
+      int64_t higher21Bits = ((int64_t)thousandsTryCount * 1000 + testNum1) << 17;
+      int64_t seed = higher21Bits + lower17BitsSeed;
+
+      Random generator = Random(seed);
+      bool isGeneratorWrong = false;
+      for (int const& testNumber: testNumbers) {
+        int rand = generator.nextInt(N);
+        if (rand != testNumber) {
+          isGeneratorWrong = true;
+          break;
+        }
+      }
+
+      if (!isGeneratorWrong) {
+        // std::cout << seed << std::endl;
+        return generator;
+      }
+    }
+
+    thousandsTryCount++;
+    if (thousandsTryCount > P_2_28) {
+      throw std::out_of_range("Unable to find seed");
+    }
+  }
+}

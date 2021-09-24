@@ -1,0 +1,74 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int n = s.nextInt();
+        s.nextLine();
+        while (n-->0) {
+            String keyword = s.nextLine();
+            String encrypted = s.nextLine();
+            
+            //generate decryption key
+            Map<Character, Character> key = new HashMap<>();
+            Set<Character> usedCharacters = new HashSet<>();
+            String reducedKeyword = "";
+            for (char c : keyword.toCharArray())  {
+                if (!usedCharacters.contains(c)) {
+                    usedCharacters.add(c);
+                    reducedKeyword+=c;
+                }
+            }
+            int l = reducedKeyword.length();
+            int alphabetLength = 'Z'-'A'+1;
+            char[] alphabet = new char[alphabetLength];
+            int index = 0;
+            for (char c : reducedKeyword.toCharArray()) {
+                alphabet[index++]=c;
+            }
+            for (char c = 'A'; c <= 'Z'; c++) {
+                if (!usedCharacters.contains(c)) {
+                    alphabet[index++]=c;
+                }
+            }
+            
+            char[] reducedKeywordChars = reducedKeyword.toCharArray();
+            Arrays.sort(reducedKeywordChars);
+            String sortedReducedKeyword = new String(reducedKeywordChars);
+            int[] keywordCharacterDeltas = new int[l];
+            for (int i = 0 ; i < l; i++) {
+                int oldPosition = reducedKeyword.indexOf(sortedReducedKeyword.charAt(i));
+                keywordCharacterDeltas[i] = oldPosition;
+            }
+            char[] sortedPreKey = new char[new Double(Math.ceil(alphabetLength*1.0/l)).intValue()*l];
+            for (int i = 0; i<alphabetLength; i += l) {
+                for (int j = 0; j<l; j++) {
+                    int newPosition = i+j;
+                    int oldPosition = i+keywordCharacterDeltas[j];
+                    if (oldPosition < alphabetLength) {
+                        sortedPreKey[newPosition] = alphabet[oldPosition];
+                    }
+                }
+            }
+            int counter = 0;
+            for (int i = 0; i < l; i++) {
+                int j = 0;
+                while ((i+l*j)<sortedPreKey.length) {
+                    char c = sortedPreKey[i+l*j];
+                    if (c > 0) {
+                        key.put(c, (char)('A'+counter++));
+                    }
+                    j++;
+                }
+            }
+            
+            //decrypt & print
+            for (char c : encrypted.toCharArray()) {
+                System.out.print(key.getOrDefault(c, c));
+            }
+            System.out.println();
+        }
+    }
+}
